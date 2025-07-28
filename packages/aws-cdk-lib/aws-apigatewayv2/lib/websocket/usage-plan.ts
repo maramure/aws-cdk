@@ -1,13 +1,13 @@
 import { Construct } from 'constructs';
+import { IWebSocketApi } from './api';
 import { IApiKey } from './api-key';
-import { CfnUsagePlan, CfnUsagePlanKey, Method } from '../../../aws-apigateway/lib';
+import { WebSocketStage } from './stage';
+import { CfnUsagePlan, CfnUsagePlanKey } from '../../../aws-apigateway/lib';
 import { validateDouble, validateInteger } from '../../../aws-apigateway/lib/util';
 import { IResource, Names, Resource, Token, Lazy } from '../../../core';
 import { addConstructMetadata, MethodMetadata } from '../../../core/lib/metadata-resource';
 import { propertyInjectable } from '../../../core/lib/prop-injectable';
 import { ThrottleSettings } from '../common';
-import { IWebSocketApi } from './api';
-import { WebSocketStage } from './stage';
 
 /**
  * Time period for which quota settings apply.
@@ -51,24 +51,6 @@ export interface QuotaSettings {
 }
 
 /**
- * Represents per-method throttling for a resource.
- */
-export interface ThrottlingPerMethod {
-  /**
-   * [disable-awslint:ref-via-interface]
-   * The method for which you specify the throttling settings.
-   * @default none
-   */
-  readonly method: Method;
-
-  /**
-   * Specifies the overall request rate (average requests per second) and burst capacity.
-   * @default none
-   */
-  readonly throttle: ThrottleSettings;
-}
-
-/**
  * Type of Usage Plan Key. Currently the only supported type is 'ApiKey'
  */
 enum UsagePlanKeyType {
@@ -92,13 +74,6 @@ export interface UsagePlanPerApiStage {
    * @default none
    */
   readonly stage?: WebSocketStage;
-
-  /**
-   * Method-level throttling settings for API methods in this stage.
-   * These settings override the overall default throttling settings.
-   * @default none
-   */
-  readonly throttle?: ThrottlingPerMethod[];
 }
 
 /**
@@ -298,11 +273,9 @@ export class UsagePlan extends UsagePlanBase {
   private createStage(apiStage: UsagePlanPerApiStage): CfnUsagePlan.ApiStageProperty {
     const stage = apiStage.stage ? apiStage.stage.stageName.toString() : undefined;
     const apiId = apiStage.stage ? apiStage.stage.api.apiId : undefined;
-    const throttle = this.renderThrottlePerMethod(apiStage.throttle);
     return {
       apiId,
       stage,
-      throttle,
     };
   }
 
@@ -335,18 +308,5 @@ export class UsagePlan extends UsagePlanBase {
       };
     }
     return ret!;
-  }
-
-  private renderThrottlePerMethod(throttlePerMethod?: ThrottlingPerMethod[]) {
-    const ret: { [key: string]: (CfnUsagePlan.ThrottleSettingsProperty | Token) } = {};
-    if (throttlePerMethod && throttlePerMethod.length > 0) {
-      throttlePerMethod.forEach((value: ThrottlingPerMethod) => {
-        const method: Method = value.method;
-        // this methodId is resource path and method for example /GET or /pets/GET
-        const methodId = `${method.resource.path}/${method.httpMethod}`;
-        ret[methodId] = this.renderThrottle(value.throttle);
-      });
-    }
-    return ret;
   }
 }
