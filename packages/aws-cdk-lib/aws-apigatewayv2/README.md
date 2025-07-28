@@ -576,7 +576,7 @@ Common config for both HTTP API and WebSocket API
 
 ### Route Settings
 
-Represents a collection of settings.
+Represents a collection of route settings.
 
 ```ts
 declare const api: apigwv2.HttpApi;
