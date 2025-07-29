@@ -383,6 +383,49 @@ describe('usage plan', () => {
     });
   });
 
+  test('add UsagePlan and ApiKey to an imported stage', () => {
+    // GIVEN
+    const stack = new cdk.Stack();
+    const api = new WebSocketApi(stack, 'my-api');
+    const importedStage = WebSocketStage.fromWebSocketStageAttributes(stack, 'imported-stage', {
+      stageName: 'my-imported-stage',
+      api: api,
+    });
+
+    const usagePlan: UsagePlan = new UsagePlan(stack, 'my-usage-plan', {
+      apiStages: [{ api: api, stage: importedStage }],
+      usagePlanName: 'Basic',
+    });
+
+    const apiKey: ApiKey = new ApiKey(stack, 'my-api-key');
+
+    // WHEN
+    usagePlan.addApiKey(apiKey);
+
+    // THEN
+    Template.fromStack(stack).hasResourceProperties('AWS::ApiGateway::UsagePlanKey', {
+      KeyId: {
+        Ref: 'myapikey1B052F70',
+      },
+      KeyType: 'API_KEY',
+      UsagePlanId: {
+        Ref: 'myusageplan23AA1E32',
+      },
+    });
+
+    Template.fromStack(stack).hasResourceProperties(RESOURCE_TYPE, {
+      UsagePlanName: 'Basic',
+      ApiStages: [
+        {
+          ApiId: {
+            Ref: 'myapi4C7BF186',
+          },
+          Stage: 'my-imported-stage',
+        },
+      ],
+    });
+  });
+
   describe('UsagePlanKey', () => {
     test('default', () => {
       // GIVEN
