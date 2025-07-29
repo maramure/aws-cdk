@@ -99,15 +99,13 @@
       "ApiId": {
        "Ref": "WebSocketApi34BCF99B"
       },
-      "Stage": "dev",
-      "Throttle": {}
+      "Stage": "dev"
      },
      {
       "ApiId": {
        "Ref": "WebSocketApi34BCF99B"
       },
-      "Stage": "dev2",
-      "Throttle": {}
+      "Stage": "dev2"
      }
     ],
     "UsagePlanName": "WebSocketUsagePlan"
