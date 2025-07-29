@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
 import { IWebSocketApi } from './api';
 import { IApiKey } from './api-key';
-import { WebSocketStage } from './stage';
+import { IWebSocketStage } from './stage';
 import { CfnUsagePlan, CfnUsagePlanKey } from '../../../aws-apigateway/lib';
 import { validateDouble, validateInteger } from '../../../aws-apigateway/lib/util';
 import { IResource, Names, Resource, Token, Lazy } from '../../../core';
@@ -73,7 +73,7 @@ export interface UsagePlanPerApiStage {
    * [disable-awslint:ref-via-interface]
    * @default none
    */
-  readonly stage?: WebSocketStage;
+  readonly stage?: IWebSocketStage;
 }
 
 /**
