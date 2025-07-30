@@ -9,7 +9,7 @@ const stack = new cdk.Stack(app, 'aws-cdk-aws-apigatewayv2-websocket-usage-plan'
 
 const webSocketApi = new WebSocketApi(stack, 'WebSocketApi');
 
-webSocketApi.addRoute('$connect', {
+webSocketApi.addRoute('$connects', {
   integration: new WebSocketMockIntegration('ConnectIntegration'),
 });
 
